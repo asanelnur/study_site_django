@@ -1,3 +1,33 @@
 from django.shortcuts import render
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.viewsets import ViewSet
+
+from users import services, serializers
+
 
 # Create your views here.
+
+
+class UserViewSet(ViewSet):
+    user_service: services.UserServicesInterface = services.UserServicesV1()
+
+    @swagger_auto_schema(request_body=serializers.CreateUserSerializer)
+    def create_user(self, request, *args, **kwargs):
+        serializer = serializers.CreateUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        tokens = self.user_service.create_user(serializer.validated_data)
+
+        return Response(tokens, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(query_serializer=serializers.GetUserSerializer)
+    def get_user(self, request, *args, **kwargs):
+        serializer = serializers.GetUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        tokens = self.user_service.get_user(data=serializer.validated_data)
+
+        return Response(tokens)
