@@ -13,6 +13,7 @@ from users import services, serializers
 
 class UserViewSet(ViewSet):
     user_service: services.UserServicesInterface = services.UserServicesV1()
+    permission_classes = []
 
     @swagger_auto_schema(request_body=serializers.CreateUserSerializer)
     def create_user(self, request, *args, **kwargs):
@@ -23,7 +24,7 @@ class UserViewSet(ViewSet):
 
         return Response(tokens, status=status.HTTP_201_CREATED)
 
-    @swagger_auto_schema(query_serializer=serializers.GetUserSerializer)
+
     def get_user(self, request, *args, **kwargs):
         serializer = serializers.GetUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

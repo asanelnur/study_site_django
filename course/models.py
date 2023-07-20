@@ -35,6 +35,11 @@ class Teacher(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ('-created_at',)
+        verbose_name = _('Teacher')
+        verbose_name_plural = _('Teachers')
+
     def __str__(self):
         return self.first_name
 
@@ -93,7 +98,7 @@ class Task(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     title = models.CharField(max_length=255)
     file = models.FileField(upload_to='files/')
-    content = models.ForeignKey(to=Section, on_delete=models.CASCADE, related_name='tasks')
+    section = models.ForeignKey(to=Section, on_delete=models.CASCADE, related_name='tasks')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
