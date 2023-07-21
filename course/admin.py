@@ -10,4 +10,5 @@ admin.site.register(models.Section)
 admin.site.register(models.Lecture)
 admin.site.register(models.Task)
 admin.site.register(models.Teacher)
+admin.site.register(models.PaidCourse)
 

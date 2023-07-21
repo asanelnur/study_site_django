@@ -1,5 +1,6 @@
 import uuid
 
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -65,7 +66,7 @@ class Course(models.Model):
         verbose_name_plural = _('Courses')
 
     def __str__(self):
-        return self.title
+        return str(self.id)
 
 
 class Section(models.Model):
@@ -105,3 +106,17 @@ class Task(models.Model):
 
     def __str__(self):
         return self.title
+
+
+
+class PaidCourse(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    user = models.ForeignKey(to=get_user_model(), on_delete=models.CASCADE, related_name='my_courses')
+    course = models.ForeignKey(to=Course, on_delete=models.CASCADE, related_name='paid_course')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ('-created_at',)
+

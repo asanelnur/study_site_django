@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+import users.models
 from course import models
 
 
@@ -64,12 +65,49 @@ class SectionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class RetrieveCourseSerializer(serializers.ModelSerializer):
+class _SectionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Section
+        fields = ('id', 'title',)
+
+
+class DetailCourseSerializer(serializers.ModelSerializer):
     teacher = _TeacherSerializer(read_only=True)
-    sections = SectionSerializer(many=True, read_only=True)
+    sections = _SectionSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Course
         fields = '__all__'
 
 
+class CreatePaidCourseSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = models.PaidCourse
+        fields = ('course', 'user')
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = users.models.CustomUser
+        fields = ('username',)
+
+
+class PaidCourseSerializer(serializers.ModelSerializer):
+    course = CourseSerializer()
+
+    class Meta:
+        model = models.PaidCourse
+        fields = ('course',)
+
+
+class DetailPaidCourseSerializer(serializers.ModelSerializer):
+    teacher = _TeacherSerializer(read_only=True)
+    sections = _SectionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = models.PaidCourse
+        fields = '__all__'

@@ -147,9 +147,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES': [
-        'course.permissions.IsAdminOrReadOnly',
-    ]
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'course.permissions.IsAdminOrReadOnly',
+    # ]
 }
 
 SIMPLE_JWT = {
