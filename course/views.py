@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from utils import mixins
 
-from course import models, serializers, permissions
+from course import models, serializers, permissions, services
 
 
 # Create your views here.
@@ -14,13 +14,15 @@ from course import models, serializers, permissions
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = models.Category.objects.all().prefetch_related('courses', 'courses__teacher')
+    course_services: services.CourseServicesInterface = services.CourseServicesV1()
+    queryset = course_services.get_categories()
     serializer_class = serializers.CategorySerializer
     permission_classes = permissions.IsAdminOrReadOnly,
 
 
 class TeacherViewSet(viewsets.ModelViewSet):
-    queryset = models.Teacher.objects.all()
+    course_services: services.CourseServicesInterface = services.CourseServicesV1()
+    queryset = course_services.get_teachers()
     serializer_class = serializers.TeacherSerializer
     permission_classes = permissions.IsAdminOrReadOnly,
 
@@ -29,19 +31,22 @@ class CourseViewSet(mixins.ActionSerializerMixin, viewsets.ModelViewSet):
     ACTION_SERIALIZERS = {
         'retrieve': serializers.DetailCourseSerializer,
     }
-    queryset = models.Course.objects.all().select_related('teacher')
+    course_services: services.CourseServicesInterface = services.CourseServicesV1()
+    queryset = course_services.get_courses()
     serializer_class = serializers.CourseSerializer
     permission_classes = permissions.IsAdminOrReadOnly,
 
 
 class SectionViewSet(viewsets.ModelViewSet):
-    queryset = models.Section.objects.all().prefetch_related('lectures', 'tasks')
+    course_services: services.CourseServicesInterface = services.CourseServicesV1()
+    queryset = course_services.get_sections()
     serializer_class = serializers.SectionSerializer
     permission_classes = permissions.IsAdminOrReadOnly,
 
 
 class LectureViewSet(viewsets.ModelViewSet):
-    queryset = models.Lecture.objects.all()
+    course_services: services.CourseServicesInterface = services.CourseServicesV1()
+    queryset = course_services.get_lectures()
     serializer_class = serializers.LectureSerializer
     permission_classes = permissions.IsAdminOrReadOnly,
 
@@ -53,10 +58,11 @@ class PaidCourseViewSet(mixins.ActionSerializerMixin, viewsets.ModelViewSet):
     }
     permission_classes = IsAuthenticated,
     serializer_class = serializers.PaidCourseSerializer
+    course_services: services.CourseServicesInterface = services.CourseServicesV1()
     queryset = models.PaidCourse.objects.all()
 
     def list(self, request, *args, **kwargs):
-        courses = models.PaidCourse.objects.filter(user=request.user)
+        courses = self.course_services.get_paid_courses(user=request.user)
         data = serializers.PaidCourseSerializer(courses, many=True).data
         return Response(data, status=status.HTTP_200_OK)
 
@@ -68,12 +74,13 @@ class PaidCourseViewSet(mixins.ActionSerializerMixin, viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        course = models.Course.objects.get(id=instance.course.id)
+        course = self.course_services.get_course(course_id=instance.id)
         serializer = serializers.DetailCourseSerializer(course)
         return Response(serializer.data)
 
 
 class TaskViewSet(viewsets.ModelViewSet):
-    queryset = models.Task.objects.all()
+    course_services: services.CourseServicesInterface = services.CourseServicesV1()
+    queryset = course_services.get_tasks()
     serializer_class = serializers.TaskSerializer
     permission_classes = permissions.IsAdminOrReadOnly,
