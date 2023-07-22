@@ -23,9 +23,10 @@ The app is written in Django Python:
 </br>
 
 
+# Explanation of the basic logic
 ---
 Admins have permissions for all action. An Unauthorized users have permission for safety actions for categories, cources, teachers. 
-
+<pre>
 class IsAdminOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         return bool(
@@ -37,7 +38,7 @@ class IsAdminOrReadOnly(BasePermission):
 
 Students who made the payment have permission for safety actions for all models. So they can watch lectures and do assignments.
 
-Which student has access to which course is checked using this table:
+Which student has access to which course is checked using this table and organized by serializers:
 When student made payment, admins add her to this table:
 
 class PaidCourse(models.Model):
@@ -51,6 +52,16 @@ class PaidCourse(models.Model):
     class Meta:
         ordering = ('-created_at',)
 
+class CourseViewSet(mixins.ActionSerializerMixin, viewsets.ModelViewSet):
+    ACTION_SERIALIZERS = {
+        'retrieve': serializers.DetailCourseSerializer,
+    }
+    course_services: services.CourseServicesInterface = services.CourseServicesV1()
+    queryset = course_services.get_courses()
+    serializer_class = serializers.CourseSerializer
+    permission_classes = permissions.IsAdminOrReadOnly,
+    
+</pre>
 
 # Database: SQLite
 <b>SQLite</b> provides an excellent development alternative for applications that are predominantly read-only or require a smaller installation footprint. As with all database servers, though, there are some differences that are specific to SQLite that you should be aware of.
